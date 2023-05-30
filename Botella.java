@@ -9,7 +9,12 @@ public class Botella extends Recipiente implements Portable {
      * Debe inicializarse con el peso propio y en estado vacia.
      */
     public Botella() {
-        // TODO - Implementar constructor
+       // super("Botella vacia",PESO_PROPIO);
+        generarNombre();
+        setPeso(PESO_PROPIO);
+        contenido=null; //setContenido(null);
+        //ya esta vacia... creo q asi nomas. no!
+        estado= new Vacia();
     }
 
 /*
@@ -86,11 +91,19 @@ public class Botella extends Recipiente implements Portable {
         @Override
         public void addElemento(Elemento elemento) throws ContenedorLlenoException, AccionNoPermitidaException {
             // TODO - Implementar metodo
+            setPeso(getPeso()+elemento.getPeso());
+            setContenido(elemento);
+            estado= new Llena();
+            generarNombre();
         }
 
         @Override
         public Elemento getElemento() throws ContenedorVacioException, AccionNoPermitidaException {
             // TODO - Implementar metodo
+           
+            if (!super.habilitado) {//no se para que es este if
+                throw new ContenedorVacioException("Botella vacia");
+            }
             return null;
         }
 
@@ -113,12 +126,17 @@ public class Botella extends Recipiente implements Portable {
         @Override
         public void addElemento(Elemento elemento) throws ContenedorLlenoException, AccionNoPermitidaException {
             // TODO - Implementar metodo
+            throw new ContenedorLlenoException("Botella llena");
         }    
 
         @Override
         public Elemento getElemento() throws ContenedorVacioException, AccionNoPermitidaException {
             // TODO - Implementar metodo
-            return null;
+            estado = new Vacia();
+            setContenido(null);
+            setPeso(PESO_PROPIO);
+            generarNombre();
+            return getContenido();
         }
 
         @Override
@@ -138,6 +156,13 @@ public class Botella extends Recipiente implements Portable {
      */
     public void generarNombre () {
         // TODO - Implementar metodo
+        if(getContenido()==null){
+            setNombre("Botella vacia");
+        }
+        else{
+            setNombre("Botella con "+getContenido());
+        }
+        
     }
 
     public Elemento getContenido() {
