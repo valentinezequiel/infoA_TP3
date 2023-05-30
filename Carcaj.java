@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +19,11 @@ public class Carcaj extends Recipiente implements Portable {
      */
     public Carcaj () {
         // TODO - Implementar constructor
+        setPeso(PESO_PROPIO);
+        setNombre("Carcaj chico");
+        capacidad= 5;
+        flechas= new ArrayList<Flecha>();
+        estado= new Vacio();     
     }
     
     /**
@@ -31,8 +37,13 @@ public class Carcaj extends Recipiente implements Portable {
      */
     public Carcaj (String nombre, Integer capacidad) {
         // TODO - Implementar constructor
+        setPeso(PESO_PROPIO);
+        setNombre(nombre);
+        this.capacidad= capacidad;
+        flechas= new ArrayList<Flecha>();
+        estado= new Vacio();  
     }
-    
+  
 /*
  ************* Patron State *************
  */
@@ -113,6 +124,20 @@ public class Carcaj extends Recipiente implements Portable {
      */
     // TODO - Implementar la clase privada
     private class Vacio extends EstadoContenedor {
+        @Override
+        public void addElemento(Elemento elemento) throws ContenedorLlenoException, AccionNoPermitidaException {
+            setPeso(getPeso()+elemento.getPeso());
+            flechas.add((Flecha)elemento);
+            estado=new ConFlechas();
+        }
+
+        @Override
+        public Elemento getElemento() throws ContenedorVacioException, AccionNoPermitidaException{
+            if (!super.habilitado) {//no se para que es este if
+                throw new ContenedorVacioException("Carcaj vacio");
+            }
+            return null;
+        } 
 
         @Override
         public String toString() {
@@ -128,6 +153,27 @@ public class Carcaj extends Recipiente implements Portable {
      */
     // TODO - Implementar la clase privada
     private class ConFlechas extends EstadoContenedor {
+        @Override
+        public void addElemento(Elemento elemento) throws ContenedorLlenoException, AccionNoPermitidaException{
+            
+            //cambia a lleno si antes de agregar tiene guardadas capacidad-1 flechas
+            if(flechas.size()==capacidad-1){
+                estado= new Lleno();
+            }   
+            setPeso(getPeso()+elemento.getPeso());
+            flechas.add((Flecha)elemento);
+
+        }
+        @Override
+        public Elemento getElemento() throws ContenedorVacioException, AccionNoPermitidaException{
+            if(flechas.size()==1){
+                estado= new Vacio();
+            }
+            Flecha flecha=flechas.remove(0);
+            setPeso(getPeso()-flecha.getPeso());
+            return flecha;
+
+        }
 
         @Override
         public String toString() {
@@ -141,7 +187,17 @@ public class Carcaj extends Recipiente implements Portable {
      */
     // TODO - Implementar la clase privada
     private class Lleno extends EstadoContenedor {
-
+        @Override
+        public void addElemento(Elemento elemento) throws ContenedorLlenoException, AccionNoPermitidaException{
+            throw new ContenedorLlenoException("Carcaj lleno");
+        }
+        @Override
+        public Elemento getElemento() throws ContenedorVacioException, AccionNoPermitidaException{
+            estado = new ConFlechas();
+            Flecha flecha=flechas.remove(0);
+            setPeso(getPeso()-flecha.getPeso());
+            return flecha;
+        }
         @Override
         public String toString() {
             return " con " + getCantidadFlechas() + " flechas (lleno)";
@@ -170,7 +226,7 @@ public class Carcaj extends Recipiente implements Portable {
     @Override
     public String toString() {
         // TODO - Implementar metodo
-        return null;
+        return getNombre()+getEstado();
     }
 
     public Integer getCantidadFlechas () {
