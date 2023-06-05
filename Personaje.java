@@ -29,8 +29,14 @@ public class Personaje {
      */
     public Personaje (String nombre, Integer vida, Integer peso) {
         // TODO - Implementar constructor
-        MAX_VIDA = -1;
-        PESO_MAXIMO_BOLSA = -1;
+        this.nombre=nombre;
+        MAX_VIDA=vida;
+        this.vida=vida;
+        PESO_MAXIMO_BOLSA=peso;
+        objeto=null;
+        bolsa=null;
+        habitacion=Mapa.getInstance().getInicio();
+
     }
 
     /**
@@ -50,6 +56,13 @@ public class Personaje {
      */
     public void irHacia (Salida direccion) {
         // TODO - Implementar metodo
+        
+        try {
+            setHabitacion(habitacion.getSalida(direccion));
+        } catch (AccionNoPermitidaException e) {
+            
+            e.printStackTrace();
+        }
     } 
 
     /**
@@ -67,6 +80,22 @@ public class Personaje {
      */
     public void guardarElemento() {
         // TODO - Implementar metodo
+        if(objeto==null){
+            System.out.println("No hay elemento para agregar a la bolsa");
+        }
+        else if(bolsa==null){
+            System.out.println(this.getNombre()+": No tiene bolsa");
+        }
+        else{
+            try {
+                bolsa.addElemento(objeto);
+                objeto=null;
+            } catch (ContenedorLlenoException | AccionNoPermitidaException e) {
+              
+                e.printStackTrace();
+            }
+        }
+        
     }
 
     /**
@@ -87,8 +116,24 @@ public class Personaje {
      * 
      * @param nombre El elemento a tomar de la bolsa.
      */
-    public void tomarElemento (String nombre) {
+    public void tomarElemento (String nombre)  {
         // TODO - Implementar metodo
+        if(objeto!=null){
+            System.out.println("Manos ocupadas");
+        }
+        else if(bolsa==null){
+            System.out.println(this.getNombre()+": No tiene bolsa");
+        }
+        else{            
+            try {
+                objeto=bolsa.getElemento(nombre);
+            } catch (ContenedorVacioException e) {
+                
+                e.printStackTrace();
+            } catch (AccionNoPermitidaException e) {
+                System.out.println("No se cuenta con el " + nombre);
+            }
+        }
     }
     
     /**
@@ -106,6 +151,19 @@ public class Personaje {
      */
     public void recogerElemento (String nombre) {
         // TODO - Implementar metodo
+        try {
+            Elemento ElementoRecogido=habitacion.getElemento(nombre);
+            
+            if(objeto!=null){
+                guardarElemento();//el objeto de las manos a la bolsa
+            }            
+            objeto=ElementoRecogido;//el objeto de la habitacion a las manos
+        } catch (ContenedorVacioException | AccionNoPermitidaException e) {
+           
+            e.printStackTrace();
+        }
+        
+        
     }
 
     /**
@@ -117,6 +175,15 @@ public class Personaje {
      */
     public void dejarElemento () {
         // TODO - Implementar metodo
+        try {
+            habitacion.addElemento(objeto);
+            objeto=null;
+        } catch (ContenedorLlenoException e) {
+            
+            e.printStackTrace();
+        } catch (AccionNoPermitidaException e) {
+            System.out.println("No hay objeto para dejar");
+        }
     }
 
 
@@ -174,5 +241,7 @@ public class Personaje {
     public void setHabitacion(Habitacion habitacion) {
     	this.habitacion=habitacion;  	
     }
-
+    public Habitacion getHabitacion(){
+        return habitacion;
+    }
 }
